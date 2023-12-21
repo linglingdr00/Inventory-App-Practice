@@ -16,5 +16,9 @@
 package com.example.inventory
 
 import android.app.Application
+import com.example.inventory.data.ItemRoomDatabase
 
-class InventoryApplication : Application()
+class InventoryApplication : Application(){
+    // 延遲建立 database instance(在首次存取時才建立)
+    val database: ItemRoomDatabase by lazy { ItemRoomDatabase.getDatabase(this) }
+}

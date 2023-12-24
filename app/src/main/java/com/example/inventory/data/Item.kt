@@ -3,6 +3,7 @@ package com.example.inventory.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.text.NumberFormat
 
 // data class entity
 // 建立 item Entity
@@ -17,3 +18,6 @@ data class Item(
     @ColumnInfo(name = "quantity") // 將 quantityInStock 設為 column，quantity 設為 column name
     val quantityInStock: Int
 )
+
+// 新增 Item 的 extension function
+fun Item.getFormatPrice():String = NumberFormat.getCurrencyInstance().format(itemPrice)

@@ -21,6 +21,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -66,11 +67,26 @@ class AddItemFragment : Fragment() {
     // 覆寫 onViewCreated() function
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // 為 save button 新增 click listener
-        binding.saveAction.setOnClickListener {
-            // 點擊 save button，則新增 new item
-            addNewItem()
+        // 新增 navigation 引數 itemId 為 id
+        val id = navigationArgs.itemId
+
+        // 如果 id 大於 0 代表 item 已建立
+        if (id > 0) {
+            // 使用 id 擷取 entity，然後在其中新增 observer
+            viewModel.retrieveItem(id).observe(this.viewLifecycleOwner) {
+                // 如果 data 改變，則更新 item 屬性並呼叫 bind() 更新 UI
+                selectedItem ->
+                item = selectedItem
+                bind(item)
+            }
+        } else { // // 如果 id = 0 代表 item 尚未建立
+            // 為 save button 新增 click listener
+            binding.saveAction.setOnClickListener {
+                // 點擊 save button，則新增 new item
+                addNewItem()
+            }
         }
+
     }
 
     /**
@@ -108,5 +124,40 @@ class AddItemFragment : Fragment() {
         // 導覽回 ItemListFragment
         val action = AddItemFragmentDirections.actionAddItemFragmentToItemListFragment()
         findNavController().navigate(action)
+    }
+
+    // 新增 bind() 更新 UI
+    private fun bind(item: Item) {
+        // 使用 format() 函式將 price 四捨五入至小數點後兩位
+        val price = "%.2f".format(item.itemPrice)
+
+        binding.apply {
+            // 將 text fields 與 entity details bind 在一起
+            itemName.setText(item.itemName, TextView.BufferType.SPANNABLE)
+            itemPrice.setText(price, TextView.BufferType.SPANNABLE)
+            itemCount.setText(item.quantityInStock.toString(), TextView.BufferType.SPANNABLE)
+
+            // 設定 save button 的 click listener
+            saveAction.setOnClickListener {
+                updateItem()
+            }
+        }
+
+    }
+
+    private fun updateItem() {
+        // 呼叫 isEntryValid() 驗證使用者輸入內容
+        if (isEntryValid()) {
+            // 呼叫傳遞 entity details 的 viewModel.updateItem()
+            viewModel.updateItem(
+                this.navigationArgs.itemId,
+                this.binding.itemName.text.toString(),
+                this.binding.itemPrice.text.toString(),
+                this.binding.itemCount.text.toString()
+            )
+            // navigate 至 ItemListFragment
+            val action = AddItemFragmentDirections.actionAddItemFragmentToItemListFragment()
+            findNavController().navigate(action)
+        }
     }
 }

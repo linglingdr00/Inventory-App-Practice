@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 // database class
 // 建立 item database class
-@Database(entities = [Item::class], version = 1, exportSchema = false)
+@Database(entities = [Item::class], version = 2, exportSchema = false)
 abstract class ItemRoomDatabase: RoomDatabase() {
     // return ItemDao 的 abstract function
     abstract fun itemDao(): ItemDao
